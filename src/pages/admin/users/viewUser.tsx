@@ -49,22 +49,22 @@ const ViewUsers = () => {
 		}
 	};
 
-	const updateUserRoles = async (userId: number, roles: string[]) => {
-		setIsLoading(true);
-		try {
-			await apiClient.patch(`/admin/users/${userId}`, {
-				roles,
-			});
-			setUser((prevUser) => ({
-				...prevUser!,
-				roles: roles,
-			}));
-		} catch (error) {
-			console.error(error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
+	// const updateUserRoles = async (userId: number, roles: string[]) => {
+	// 	setIsLoading(true);
+	// 	try {
+	// 		await apiClient.patch(`/admin/users/${userId}`, {
+	// 			roles,
+	// 		});
+	// 		setUser((prevUser) => ({
+	// 			...prevUser!,
+	// 			roles: roles,
+	// 		}));
+	// 	} catch (error) {
+	// 		console.error(error);
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 	}
+	// };
 
 	useEffect(() => {
 		if (isAuthenticated && id) {
@@ -79,7 +79,7 @@ const ViewUsers = () => {
 	const roles = [
 		{ id: 1, label: "Admin", value: "admin" },
 		{ id: 2, label: "Editor", value: "editor" },
-		{ id: 2, label: "Spectator", value: "spectator" },
+		{ id: 3, label: "Spectator", value: "spectator" },
 	];
 
 	return (

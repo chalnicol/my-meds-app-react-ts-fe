@@ -164,7 +164,7 @@ const Home = () => {
 												key={med.id}
 												className="p-3 border rounded-md bg-gray-50 border-gray-300 space-y-3"
 											>
-												<div className="flex flex-col sm:flex-row gap-x-4 gap-y-3 justify-between">
+												<div className="flex flex-col sm:flex-row gap-4 justify-between">
 													<div>
 														<p>
 															<span className="text-lg font-bold">

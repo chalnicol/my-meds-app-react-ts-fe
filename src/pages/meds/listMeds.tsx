@@ -268,7 +268,7 @@ const ListMeds = () => {
 										key={med.id}
 										className="border border-gray-300 p-4 rounded shadow flex items-start"
 									>
-										<div className="flex-1 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 gap-y-3">
+										<div className="flex-1 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 											<div>
 												<span className="text-lg font-bold me-1.5">
 													{med.brandName}
