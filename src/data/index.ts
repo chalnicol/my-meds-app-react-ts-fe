@@ -1,0 +1,123 @@
+//import type { MedsInfo } from "../types";
+
+// export const meds: MedsInfo[] = [
+// 	{
+// 		id: 1,
+// 		brandName: "Normax",
+// 		genericName: "Metformin",
+// 		dosage: "500mg",
+// 		dailySchedule: [
+// 			{ id: "a2dsdf", time: "08:00 AM" },
+// 			{ id: "xte3as", time: "04:00 PM" },
+// 		],
+// 		frequency: [],
+// 		remainingStock: 10,
+// 		stockHistory: [{ quantity: 10, price: 50.0, source: "Mercury Lagro" }],
+// 	},
+
+// 	{
+// 		id: 2,
+// 		brandName: "Biogesic",
+// 		genericName: "Paracetamol",
+// 		dosage: "500mg",
+// 		dailySchedule: [
+// 			{ id: "a2dsdf", time: "08:00 AM" },
+// 			{ id: "xte3as", time: "04:00 PM" },
+// 		],
+// 		frequency: [1, 3, 5],
+// 		remainingStock: 20,
+// 		stockHistory: [{ quantity: 20, price: 5.75, source: "Mercury Lagro" }],
+// 	},
+// 	{
+// 		id: 3,
+// 		brandName: "Advil",
+// 		genericName: "Ibuprofen",
+// 		dosage: "200mg",
+// 		dailySchedule: [
+// 			{ id: "a2dsdf", time: "08:00 AM" },
+// 			{ id: "xte3as", time: "04:00 PM" },
+// 		],
+// 		remainingStock: 15,
+// 		frequency: [1, 3, 5], // Monday, Wednesday, Friday
+// 		stockHistory: [
+// 			{ quantity: 15, price: 12.0, source: "Watsons SM Fairview" },
+// 		],
+// 	},
+// 	{
+// 		id: 4,
+// 		brandName: "Amoxicillin",
+// 		genericName: "Amoxicillin",
+// 		dosage: "250mg",
+// 		dailySchedule: [
+// 			{ id: "a2dsdf", time: "08:00 AM" },
+// 			{ id: "xte3as", time: "04:00 PM" },
+// 			{ id: "wer9aw", time: "12:00 PM" },
+// 		],
+// 		remainingStock: 30,
+// 		frequency: [0, 1, 2, 3, 4],
+// 		stockHistory: [{ quantity: 30, price: 8.5, source: "Southstar Drug" }],
+// 	},
+// 	{
+// 		id: 5,
+// 		brandName: "Cetirizine",
+// 		genericName: "Cetirizine",
+// 		dosage: "10mg",
+// 		dailySchedule: [
+// 			{ id: "a2dsdf", time: "08:00 AM" },
+// 			{ id: "xte3as", time: "04:00 PM" },
+// 			{ id: "wer9aw", time: "12:00 PM" },
+// 		],
+// 		frequency: [],
+// 		remainingStock: 25,
+// 		stockHistory: [{ quantity: 25, price: 7.25, source: "Mercury Lagro" }],
+// 	},
+// ];
+
+export const weekDays: { id: number; name: string; shortcut: string }[] = [
+	{ id: 0, name: "Sunday", shortcut: "Sun" },
+	{ id: 1, name: "Monday", shortcut: "Mon" },
+	{ id: 2, name: "Tuesday", shortcut: "Tue" },
+	{ id: 3, name: "Wednesday", shortcut: "Wed" },
+	{ id: 4, name: "Thursday", shortcut: "Thu" },
+	{ id: 5, name: "Friday", shortcut: "Fri" },
+	{ id: 6, name: "Saturday", shortcut: "Sat" },
+];
+
+export const timezones = [
+	{ id: 1, value: "Pacific/Midway" },
+	{ id: 2, value: "Pacific/Honolulu" },
+	{ id: 3, value: "America/Anchorage" },
+	{ id: 4, value: "America/Los_Angeles" },
+	{ id: 5, value: "America/Denver" },
+	{ id: 6, value: "America/Chicago" },
+	{ id: 7, value: "America/New_York" },
+	{ id: 8, value: "America/Caracas" },
+	{ id: 9, value: "America/Halifax" },
+	{ id: 10, value: "America/Sao_Paulo" },
+	{ id: 11, value: "America/Argentina/Buenos_Aires" },
+	{ id: 12, value: "Atlantic/Cape_Verde" },
+	{ id: 13, value: "Atlantic/Azores" },
+	{ id: 14, value: "Europe/London" },
+	{ id: 15, value: "Europe/Paris" },
+	{ id: 16, value: "Europe/Berlin" },
+	{ id: 17, value: "Europe/Rome" },
+	{ id: 18, value: "Europe/Athens" },
+	{ id: 19, value: "Europe/Moscow" },
+	{ id: 20, value: "Asia/Dubai" },
+	{ id: 21, value: "Asia/Karachi" },
+	{ id: 22, value: "Asia/Kolkata" },
+	{ id: 23, value: "Asia/Kathmandu" },
+	{ id: 24, value: "Asia/Dhaka" },
+	{ id: 25, value: "Asia/Bangkok" },
+	{ id: 26, value: "Asia/Jakarta" },
+	{ id: 27, value: "Asia/Manila" },
+	{ id: 28, value: "Asia/Shanghai" },
+	{ id: 29, value: "Asia/Tokyo" },
+	{ id: 30, value: "Australia/Darwin" },
+	{ id: 31, value: "Australia/Adelaide" },
+	{ id: 32, value: "Australia/Sydney" },
+	{ id: 33, value: "Pacific/Guadalcanal" },
+	{ id: 34, value: "Pacific/Auckland" },
+	{ id: 35, value: "Pacific/Fiji" },
+	{ id: 36, value: "Pacific/Tarawa" },
+];
