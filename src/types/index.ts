@@ -40,6 +40,9 @@ export interface MedsIntakeInfo {
 export interface RoleInfo {
 	id: number;
 	name: string;
+	guard: string;
+	createdAt?: string;
+	updatedAt?: string;
 }
 
 export interface UserInfo {
@@ -48,15 +51,16 @@ export interface UserInfo {
 	email: string;
 	roles: string[]; // Array of role names
 	permissions: string[];
-	isBlocked: boolean;
+	is_blocked: boolean;
 	timezone: string;
 	social_user: boolean;
+	firebase_uid: boolean;
 	medications_count?: number;
 	stocks_count?: number;
 	medications: MedsInfo[];
 	stocks: StockInfo[];
-	createdAt?: string;
-	updatedAt?: string;
+	created_at?: string;
+	updated_at?: string;
 }
 
 export interface PageLink {
@@ -105,6 +109,12 @@ export interface NavLinks {
 	public: NavLinkInfo[];
 	unauth: NavLinkInfo[];
 	auth: NavLinkInfo[];
+}
+
+export interface BreadCrumbsInfo {
+	id: number;
+	label: string;
+	path: string | null;
 }
 
 export type TimeOfDayType = "Morning" | "Afternoon" | "Evening" | "Night";

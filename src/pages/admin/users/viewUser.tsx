@@ -1,18 +1,31 @@
 import { useEffect, useState } from "react";
 import Header from "../../../components/header";
-import type { UserInfo } from "../../../types";
+import type { RoleInfo, UserInfo } from "../../../types";
 import apiClient from "../../../utils/axiosConfig";
 import Loader from "../../../components/loader";
 import { useAuth } from "../../../context/AuthProvider";
 import { useParams } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import StatusMessage from "../../../components/statusMessage";
+import BreadCrumbs from "../../../components/breadCrumbs";
+import { formatDate } from "../../../utils/formatters";
+import { toggleBlockUser, updateUserRoles } from "../../../service/userService";
 
 const ViewUsers = () => {
-	const { isAuthenticated, updateCurrentPage } = useAuth();
+	const {
+		isAuthenticated,
+		user: authUser,
+		hasRole,
+		updateCurrentPage,
+	} = useAuth();
 
 	const { id } = useParams<{ id: string }>();
 
 	const [user, setUser] = useState<UserInfo | null>(null);
+	const [roles, setRoles] = useState<RoleInfo[]>([]);
+	const [error, setError] = useState<string | null>(null);
+	const [success, setSuccess] = useState<string | null>(null);
+
 	const [isLoading, setIsLoading] = useState(false);
 
 	const fetchUser = async (userId: number) => {
@@ -20,7 +33,6 @@ const ViewUsers = () => {
 		try {
 			const response = await apiClient.get(`/admin/users/${userId}`);
 			setUser(response.data.user);
-			console.log(response);
 		} catch (error) {
 			console.error(error);
 		} finally {
@@ -28,8 +40,28 @@ const ViewUsers = () => {
 		}
 	};
 
-	const toggleRole = (role: string) => {
-		if (user) {
+	const fetchRoles = async () => {
+		setIsLoading(true);
+		try {
+			const response = await apiClient.get("/admin/roles");
+			setRoles(response.data.roles);
+			// console.log(response);
+			return response.data.roles;
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const updateRoles = async (role: string) => {
+		if (!user) return;
+		setIsLoading(true);
+		setSuccess(null);
+		setError(null);
+		try {
+			const response = await updateUserRoles(user.id, role);
+			setSuccess(response.message);
 			setUser((prevUser) => {
 				if (prevUser) {
 					if (prevUser.roles.includes(role)) {
@@ -46,40 +78,52 @@ const ViewUsers = () => {
 				}
 				return prevUser;
 			});
+		} catch (error: any) {
+			setError(error.message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
 
-	// const updateUserRoles = async (userId: number, roles: string[]) => {
-	// 	setIsLoading(true);
-	// 	try {
-	// 		await apiClient.patch(`/admin/users/${userId}`, {
-	// 			roles,
-	// 		});
-	// 		setUser((prevUser) => ({
-	// 			...prevUser!,
-	// 			roles: roles,
-	// 		}));
-	// 	} catch (error) {
-	// 		console.error(error);
-	// 	} finally {
-	// 		setIsLoading(false);
-	// 	}
-	// };
+	const toggleBlock = async () => {
+		if (!user) return;
+		setIsLoading(true);
+		try {
+			const response = await toggleBlockUser(user.id);
+			setUser((prevUser) => {
+				if (prevUser) {
+					return {
+						...prevUser,
+						is_blocked: !prevUser.is_blocked,
+					};
+				}
+				return prevUser;
+			});
+			setSuccess(response.message);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	useEffect(() => {
-		if (isAuthenticated && id) {
-			fetchUser(parseInt(id));
-		}
+		if (!id || !isAuthenticated) return;
+		const fetchAll = async () => {
+			await fetchUser(parseInt(id));
+			await fetchRoles();
+		};
+		fetchAll();
 	}, [isAuthenticated, id]);
 
 	useEffect(() => {
 		updateCurrentPage("admin-users-details");
 	}, []);
 
-	const roles = [
-		{ id: 1, label: "Admin", value: "admin" },
-		{ id: 2, label: "Editor", value: "editor" },
-		{ id: 3, label: "Spectator", value: "spectator" },
+	const breadCrumbLinks = [
+		{ id: 1, label: "Admin", path: "/admin" },
+		{ id: 2, label: "Users", path: "/admin/users" },
+		{ id: 3, label: "User Details", path: null },
 	];
 
 	return (
@@ -90,11 +134,28 @@ const ViewUsers = () => {
 			<Header>
 				<p className="text-xl font-bold">Users Details</p>
 			</Header>
+
 			<div className="p-3">
-				<div className="mt-2 space-y-3">
+				<BreadCrumbs links={breadCrumbLinks} className="mb-2" />
+
+				{success && (
+					<StatusMessage
+						message={success}
+						type="success"
+						onClose={() => setSuccess(null)}
+					/>
+				)}
+				{error && (
+					<StatusMessage
+						message={error}
+						type="error"
+						onClose={() => setError(null)}
+					/>
+				)}
+				<div className="mt-3 space-y-3">
 					{user ? (
 						<>
-							<div className="flex-1 grid sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
+							<div className="flex-1 grid sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-5">
 								<div>
 									<p className="text-xs text-gray-500 font-bold">
 										Full Name
@@ -119,6 +180,23 @@ const ViewUsers = () => {
 								</div>
 								<div>
 									<p className="text-xs text-gray-500 font-bold">
+										Date Joined
+									</p>
+									<p className="text-sm text-gray-600">
+										{formatDate(user.created_at || "")}
+									</p>
+								</div>
+								<div>
+									<p className="text-xs text-gray-500 font-bold">
+										Firebase ID
+									</p>
+									<p className="text-sm text-gray-600">
+										{user.firebase_uid || "n/a"}
+									</p>
+								</div>
+								{/* social */}
+								<div>
+									<p className="text-xs text-gray-500 font-bold">
 										Social User
 									</p>
 									<p
@@ -131,53 +209,75 @@ const ViewUsers = () => {
 										{user.social_user ? "Yes" : "No"}
 									</p>
 								</div>
+								{/* block status */}
 								<div>
 									<p className="text-xs text-gray-500 font-bold">
 										Account Status
 									</p>
-									<div className="mt-1">
+									{authUser &&
+									authUser.id !== user.id &&
+									hasRole("admin") ? (
 										<button
-											className={`text-xs px-3 py-1 shadow-md rounded-full cursor-pointer text-white font-bold text-gray-600 ${
-												user.isBlocked
+											className={`text-xs mt-1 px-3 py-1 shadow-md rounded-full cursor-pointer text-white font-bold text-gray-600 ${
+												user.is_blocked
 													? "bg-green-500 hover:bg-green-400"
 													: "bg-red-500 hover:bg-red-400"
 											}`}
+											onClick={toggleBlock}
 										>
-											{user.isBlocked
+											{user.is_blocked
 												? "ACTIVATE USER"
 												: "BLOCK USER"}
 										</button>
-									</div>
+									) : (
+										<span
+											className={`text-xs px-2 rounded-lg text-white font-semibold text-gray-600 select-none ${
+												user.is_blocked
+													? "bg-red-500"
+													: "bg-green-500"
+											}`}
+										>
+											{user.is_blocked ? "BLOCKED" : "ACTIVE"}
+										</span>
+									)}
 								</div>
+
+								{/* roles*/}
 								<div>
 									<p className="text-xs text-gray-500 font-bold">
 										Roles
 									</p>
-									<div className="mt-1 flex flex-wrap gap-x-2 gap-y-1.5">
-										{roles.map((role) => (
-											<button
-												key={role.id}
-												className="border border-gray-400 text-xs font-bold rounded-full shadow cursor-pointer hover:bg-gray-100 flex items-center"
-												onClick={() => toggleRole(role.value)}
-											>
-												<FontAwesomeIcon
-													icon={`${
-														user.roles.includes(role.value)
-															? "circle-check"
-															: "circle"
-													}`}
-													className={`p-1 ${
-														user.roles.includes(role.value)
-															? "text-green-600"
-															: "text-gray-500"
-													}`}
-												/>
-												<span className="border-s border-gray-400 px-2 py-1">
-													{role.label.toUpperCase()}
-												</span>
-											</button>
-										))}
-									</div>
+									{roles.length > 0 ? (
+										<div className="mt-1 flex flex-wrap gap-x-2 gap-y-1.5">
+											{roles.map((role) => (
+												<button
+													key={role.id}
+													className="border border-gray-400 text-xs font-bold rounded-full shadow cursor-pointer hover:bg-gray-100 flex items-center"
+													onClick={() => updateRoles(role.name)}
+												>
+													<FontAwesomeIcon
+														icon={`${
+															user.roles.includes(role.name)
+																? "circle-check"
+																: "circle"
+														}`}
+														className={`p-1 ${
+															user.roles.includes(role.name)
+																? "text-green-600"
+																: "text-gray-500"
+														}`}
+													/>
+													<span className="border-s border-gray-400 px-2 py-1">
+														{role.name.toUpperCase()}
+													</span>
+												</button>
+											))}
+										</div>
+									) : (
+										<p>
+											{isLoading ? "Loading..." : "No roles found."}
+										</p>
+									)}
 								</div>
 							</div>
 						</>

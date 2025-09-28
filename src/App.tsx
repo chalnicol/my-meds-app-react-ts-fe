@@ -45,6 +45,7 @@ import {
 	faMedkit,
 	faTriangleExclamation,
 	faBomb,
+	faArrowTrendUp,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -119,6 +120,7 @@ library.add(
 	faPesoSign,
 	faCheck,
 	faMedkit,
+	faArrowTrendUp,
 	faTriangleExclamation,
 	farThumbsUp,
 	farThumbsDown

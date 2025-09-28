@@ -46,6 +46,7 @@ const OptionButton = ({
 		setShowOptions(false);
 		onMenuClick(medicationId, option);
 	};
+
 	return (
 		<div ref={containerRef} className="relative">
 			<button
@@ -57,17 +58,25 @@ const OptionButton = ({
 			{showOptions && (
 				<div
 					ref={optionsRef}
-					className="absolute w-30 top-0 right-full border border-gray-300 rounded bg-white shadow-md overflow-hidden"
+					className="absolute min-w-32 top-0 right-full border border-gray-300 rounded bg-white shadow-md overflow-hidden"
 				>
-					{options.map((option) => (
-						<button
-							key={option.id}
-							className="w-full text-left px-2 py-1 text-sm hover:bg-gray-200 cursor-pointer"
-							onClick={() => handleMenuClick(option.value)}
-						>
-							{option.label}
-						</button>
-					))}
+					{options.length > 0 ? (
+						<>
+							{options.map((option) => (
+								<button
+									key={option.id}
+									className="w-full text-left px-2 py-1 text-sm hover:bg-gray-200 cursor-pointer"
+									onClick={() => handleMenuClick(option.value)}
+								>
+									{option.label}
+								</button>
+							))}
+						</>
+					) : (
+						<p className="w-full text-left px-2 py-1 text-sm hover:bg-gray-200 cursor-pointer">
+							-no options-
+						</p>
+					)}
 				</div>
 			)}
 		</div>

@@ -263,7 +263,9 @@ const Home = () => {
 					</div>
 				) : (
 					<div className="text-center p-10 bg-white rounded-lg shadow">
-						<h1 className="text-4xl font-bold mb-2">My Meds App</h1>
+						<h1 className="text-4xl font-bold mb-2">{`Welcome to ${
+							import.meta.env.VITE_APP_NAME
+						}!`}</h1>
 						<p className="text-lg text-gray-600 mb-6">
 							Your personal medication management assistant.
 						</p>

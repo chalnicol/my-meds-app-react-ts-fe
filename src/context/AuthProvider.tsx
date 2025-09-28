@@ -362,7 +362,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
 	// Check if user has a specific role
 	const hasRole = (role: string): boolean => {
-		return user?.roles?.includes(role) || false;
+		if (!user) return false;
+		if (user.roles.length == 0) return false;
+		return user.roles.includes(role);
 	};
 
 	// Check if user has a specific permission
