@@ -46,11 +46,14 @@ import {
 	faTriangleExclamation,
 	faBomb,
 	faArrowTrendUp,
+	faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
 	faThumbsUp as farThumbsUp,
 	faThumbsDown as farThumbsDown,
+	faCheckCircle as farCheckCircle,
+	faCircleXmark as farCircleXmark,
 } from "@fortawesome/free-regular-svg-icons";
 
 import { useAuth } from "./context/AuthProvider";
@@ -64,7 +67,6 @@ import ListMeds from "./pages/meds/listMeds";
 import EditMeds from "./pages/meds/editMeds";
 import ForgotPassword from "./pages/auth/forgotPassword";
 import ResetPassword from "./pages/auth/resetPassword";
-import Home from "./pages/home";
 import About from "./pages/about";
 import NotFound from "./pages/notfound";
 import Login from "./pages/auth/login";
@@ -78,6 +80,8 @@ import TermsOfService from "./pages/termsOfService";
 import PrivacyPolicy from "./pages/privacyPolicy";
 import ListUsers from "./pages/admin/users/listUsers";
 import ViewUsers from "./pages/admin/users/viewUser";
+import ScrollToTop from "./components/scrollToTop";
+import Home from "./pages/home";
 
 library.add(
 	faCoffee,
@@ -120,10 +124,13 @@ library.add(
 	faPesoSign,
 	faCheck,
 	faMedkit,
+	faSpinner,
 	faArrowTrendUp,
 	faTriangleExclamation,
 	farThumbsUp,
-	farThumbsDown
+	farThumbsDown,
+	farCheckCircle,
+	farCircleXmark
 );
 
 const App = () => {
@@ -132,8 +139,10 @@ const App = () => {
 	const renderPages = (): React.ReactNode => {
 		return (
 			<>
+				<ScrollToTop />
 				<Routes>
 					<Route path="/" element={<Home />} />
+					{/* <Route path="/" element={<TodaysMeds />} /> */}
 					<Route path="/about" element={<About />} />
 					<Route path="/terms-of-service" element={<TermsOfService />} />
 					<Route path="/privacy-policy" element={<PrivacyPolicy />} />

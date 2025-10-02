@@ -1,47 +1,47 @@
 import { useEffect, useState } from "react";
-import { timezones } from "../../data";
+import { userDetailsRules } from "../../data";
 import { useAuth } from "../../context/AuthProvider";
+import FormRules from "../formRules";
 
-interface UpdateProfileProps {
-	currentFullname: string;
-	currentEmail: string;
-	currentTimezone: string;
-}
-
-const UpdateProfile = ({
-	currentFullname,
-	currentEmail,
-	currentTimezone,
-}: UpdateProfileProps) => {
-	const { updateProfile, isLoading, success, error, clearMessages } =
+const UpdateProfile = () => {
+	const { updateProfile, user, isLoading, success, error, clearMessages } =
 		useAuth();
 
-	const [fullname, setFullname] = useState<string>(currentFullname);
-	const [email, setEmail] = useState<string>(currentEmail);
-	const [timezone, setTimezone] = useState<string>(currentTimezone);
+	const [fullname, setFullname] = useState<string>("");
+	const [email, setEmail] = useState<string>("");
+	// const [timezone, setTimezone] = useState<string>(currentTimezone);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		await updateProfile(email, fullname, timezone);
+		await updateProfile(email, fullname);
 	};
 
 	const reset = () => {
-		setFullname(currentFullname);
-		setEmail(currentEmail);
-		setTimezone(currentTimezone);
+		if (!user) return;
+		setFullname(user.fullname);
+		setEmail(user.email);
+		clearMessages();
 	};
 
 	useEffect(() => {
+		if (user) {
+			setFullname(user.fullname);
+			setEmail(user.email);
+		}
 		return () => {
 			clearMessages();
 		};
-	}, []);
+	}, [user]);
 
 	return (
 		<>
 			<form onSubmit={handleSubmit} className="space-y-4 mt-1">
 				<div className="space-y-1">
-					<p className="text-sm font-semibold">Full Name</p>
+					<div className="text-sm text-gray-700 flex items-center gap-x-1">
+						<FormRules rules={userDetailsRules.fullname} />
+						<span>Full Name</span>
+					</div>
+
 					<input
 						type="text"
 						className="px-3 py-2 rounded border border-gray-400 w-full focus:outline-none focus:ring-1 focus:ring-gray-300"
@@ -50,7 +50,11 @@ const UpdateProfile = ({
 					/>
 				</div>
 				<div className="space-y-1">
-					<p className="text-sm font-semibold">Email</p>
+					{/* <p className="text-sm font-semibold">Email</p> */}
+					<div className="text-sm text-gray-700 flex items-center gap-x-1">
+						<FormRules rules={userDetailsRules.email} />
+						<span>Email</span>
+					</div>
 					<input
 						type="text"
 						className="px-3 py-2 rounded border border-gray-400 w-full focus:outline-none focus:ring-1 focus:ring-gray-300"
@@ -59,8 +63,8 @@ const UpdateProfile = ({
 					/>
 				</div>
 
-				<div className="space-y-1">
-					<p className="text-sm font-semibold">Timezone</p>
+				{/* <div className="space-y-1">
+					<p className="text-sm text-gray-700">Timezone</p>
 					<input
 						type="text"
 						className="px-3 py-2 rounded border border-gray-400 w-full focus:outline-none focus:ring-1 focus:ring-gray-300"
@@ -89,7 +93,7 @@ const UpdateProfile = ({
 							</div>
 						))}
 					</div>
-				</div>
+				</div> */}
 
 				<div className="space-x-2 mt-2">
 					<button

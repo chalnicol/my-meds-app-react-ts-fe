@@ -14,13 +14,14 @@ import Loader from "../../components/loader";
 import Header from "../../components/header";
 import StatusMessage from "../../components/statusMessage";
 
-import { formatDate, formatPrice } from "../../utils/formatters";
+import { formatDate, formatPrice, formatTime } from "../../utils/formatters";
 import RestockModal from "../../components/restockModal";
 import useDebounce from "../../hooks/useDebounce";
 import { getStockColorClass } from "../../utils/generators";
+import { useAuth } from "../../context/AuthProvider";
 
 const ViewMeds = () => {
-	// const { isAuthenticated } = useAuth();
+	const { updateCurrentPage } = useAuth();
 
 	const { id } = useParams<{ id: string }>();
 
@@ -31,11 +32,9 @@ const ViewMeds = () => {
 	const [toDelete, setToDelete] = useState<boolean>(false);
 	const [toRestock, setToRestock] = useState<boolean>(false);
 	const [toEditRestock, setToEditRestock] = useState<StockInfo | null>(null);
-
 	const [stockHistory, setStockHistory] = useState<StockInfo[]>([]);
 	const [currentPage, setCurrentPage] = useState<number>(1);
 	const [lastPage, setLastPage] = useState<number>(1);
-
 	const [searchTerm, setSearchTerm] = useState("");
 
 	const debouncedSearchTerm = useDebounce(searchTerm, 500); // 500ms delay
@@ -141,17 +140,17 @@ const ViewMeds = () => {
 			setMeds((prev) => {
 				if (!prev) return null;
 
-				const newQuantity = prev.totalQuantity
-					? Number(prev.totalQuantity) + stock.quantity
+				const newQuantity = prev.total_quantity
+					? Number(prev.total_quantity) + stock.quantity
 					: stock.quantity;
-				const newValue = prev.totalValue
-					? prev.totalValue + stock.price * stock.quantity
+				const newValue = prev.total_value
+					? prev.total_value + stock.price * stock.quantity
 					: stock.price * stock.quantity;
 				return {
 					...prev,
-					remainingStock: prev.remainingStock + stock.quantity,
-					totalQuantity: newQuantity,
-					totalValue: newValue,
+					remaining_stock: prev.remaining_stock + stock.quantity,
+					total_quantity: newQuantity,
+					total_value: newValue,
 				};
 			});
 		}
@@ -190,25 +189,25 @@ const ViewMeds = () => {
 			setMeds((prev) => {
 				if (!prev) return null;
 
-				const newQuantity = prev.totalQuantity
-					? Number(prev.totalQuantity) +
+				const newQuantity = prev.total_quantity
+					? Number(prev.total_quantity) +
 					  stock.quantity -
 					  oldStockHistoryQuantity
 					: stock.quantity;
-				const newValue = prev.totalValue
-					? prev.totalValue +
+				const newValue = prev.total_value
+					? prev.total_value +
 					  stock.price * stock.quantity -
 					  oldStockHistoryValue
 					: stock.price * stock.quantity;
 
 				const newRemainingStock =
-					prev.remainingStock + stock.quantity - oldStockHistoryQuantity;
+					prev.remaining_stock + stock.quantity - oldStockHistoryQuantity;
 
 				return {
 					...prev,
-					remainingStock: newRemainingStock,
-					totalQuantity: newQuantity,
-					totalValue: newValue,
+					remaining_stock: newRemainingStock,
+					total_quantity: newQuantity,
+					total_value: newValue,
 				};
 			});
 		}
@@ -225,15 +224,19 @@ const ViewMeds = () => {
 		}
 	};
 
+	// useEffect(() => {
+	// 	if (id) {
+	// 		fetchMed(parseInt(id));
+	// 		fetchStockHistory(parseInt(id), 1, debouncedSearchTerm);
+	// 	}
+	// }, [id]);
 	useEffect(() => {
-		if (id) {
-			fetchMed(parseInt(id));
-			fetchStockHistory(parseInt(id), 1, debouncedSearchTerm);
-		}
-	}, [id]);
+		updateCurrentPage("viewMedication");
+	}, []);
 
 	useEffect(() => {
 		if (!id) return;
+		fetchMed(parseInt(id));
 		fetchStockHistory(parseInt(id), 1, debouncedSearchTerm);
 	}, [id, debouncedSearchTerm]);
 
@@ -316,7 +319,7 @@ const ViewMeds = () => {
 						)}
 						{toDelete && (
 							<StatusMessage
-								message={`Are you sure you want to delete ${meds.brandName}?`}
+								message={`Are you sure you want to delete ${meds.brand_name}?`}
 								type="warning"
 								fixed={true}
 								onClose={() => setToDelete(false)}
@@ -341,13 +344,13 @@ const ViewMeds = () => {
 						<div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
 							<div>
 								<span className="text-xl font-bold me-1.5">
-									{meds.brandName}
+									{meds.brand_name}
 								</span>
 								<span className="text-gray-500 text-sm ms-0.5">
 									({meds.dosage})
 								</span>
 								<p className="text-sm text-gray-500 font-semibold">
-									{meds.genericName}
+									{meds.generic_name}
 								</p>
 							</div>
 							<div>
@@ -356,10 +359,10 @@ const ViewMeds = () => {
 								</p>
 								<p
 									className={`font-bold text-2xl ${getStockColorClass(
-										meds.remainingStock
+										meds.remaining_stock
 									)}`}
 								>
-									{meds.remainingStock}
+									{meds.remaining_stock}
 								</p>
 							</div>
 							<div>
@@ -375,6 +378,12 @@ const ViewMeds = () => {
 										{meds.status}
 									</p>
 								</div>
+							</div>
+							<div>
+								<p className="text-xs font-semibold">Drug Form:</p>
+								<span className="text-xs font-bold rounded-full border border-gray-400 rounded px-3 py-0.5 shadow">
+									{meds.drug_form}
+								</span>
 							</div>
 							<div>
 								<p className="text-xs font-semibold">Frequency:</p>
@@ -402,12 +411,12 @@ const ViewMeds = () => {
 									Time Intake Schedule:
 								</p>
 								<div className="mt-1.5 flex flex-wrap gap-1">
-									{meds.dailySchedule.map((schedule) => (
+									{meds.time_schedules.map((ts) => (
 										<p
-											key={schedule.id}
+											key={ts.id}
 											className="text-xs font-bold rounded-full border border-gray-400 rounded px-3 py-0.5 shadow"
 										>
-											{schedule.time}
+											{formatTime(ts.schedule_time)}
 										</p>
 									))}
 								</div>
@@ -425,7 +434,7 @@ const ViewMeds = () => {
 											Total Purchased Amount
 										</p>
 										<p className="font-bold text-2xl">
-											{formatPrice(meds.totalValue, "en-US", "PHP")}
+											{formatPrice(meds.total_value, "en-US", "PHP")}
 										</p>
 									</div>
 									<div className="border border-gray-400 rounded px-3 py-2 bg-gray-100">
@@ -433,7 +442,7 @@ const ViewMeds = () => {
 											Total Purchased Stock
 										</p>
 										<p className="font-bold text-2xl">
-											{meds.totalQuantity}
+											{meds.total_quantity}
 										</p>
 									</div>
 								</div>

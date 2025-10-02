@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthProvider";
 import gsap from "gsap";
 
 const DeleteAccount = () => {
-	const { isLoading, deleteAccount } = useAuth();
+	const { isLoading, hasRole, deleteAccount } = useAuth();
 
 	const [showConfirmation, setShowConfirmation] = useState<boolean>(false);
 
@@ -28,6 +28,15 @@ const DeleteAccount = () => {
 			}
 		};
 	}, [showConfirmation, confirmRef.current]);
+
+	if (hasRole("admin")) {
+		return (
+			<p className="p-4 bg-gray-100 rounded text-center border border-gray-300">
+				You are not allowed to delete your account.
+			</p>
+		);
+	}
+
 	return (
 		<div className="space-y-3 overflow-hidden">
 			<p>This action is irreversible.</p>

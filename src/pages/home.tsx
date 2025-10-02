@@ -8,9 +8,9 @@ import {
 } from "../service/medicationService";
 import { type MedsInfo, type MedsIntakeInfo } from "../types";
 import Header from "../components/header";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import StatusMessage from "../components/statusMessage";
 import { getStockColorClass } from "../utils/generators";
+import { formatTime } from "../utils/formatters";
 
 const Home = () => {
 	const { isAuthenticated, user, updateCurrentPage } = useAuth();
@@ -36,69 +36,83 @@ const Home = () => {
 		}
 	};
 
-	const updateMedsIntake = async (id: number, time: string) => {
+	// const updateMedsIntake = async (id: number) => {
+	// 	setIsLoading(true);
+	// 	try {
+	// 		const response = await takeMedication(id);
+	// 		setSuccess(response.message);
+	// 	} catch (error) {
+	// 		setError("Failed to update medication scheduled intake.");
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 	}
+	// };
+
+	const handleMedsIntake = async (
+		medId: number,
+		timeScheduleId: number,
+		quantity: number
+	) => {
+		if (!user) return;
+
+		const medication = todaysMeds.find((med) => med.id == medId);
+		if (!medication) {
+			setError("Medication not found.");
+			return;
+		}
+		if (medication.remaining_stock <= 0) {
+			setError("Medication has no remaining stock.");
+			return;
+		}
+
 		setIsLoading(true);
 		try {
-			const response = await takeMedication(id, time);
+			const response = await takeMedication(timeScheduleId);
 			setSuccess(response.message);
+
+			//update..
+			const medIsTaken = isTaken(timeScheduleId);
+
+			setTodaysMeds((prev) => {
+				return prev.map((med) => {
+					if (med.id == medId) {
+						const newRemainingStock = medIsTaken
+							? med.remaining_stock + 1
+							: med.remaining_stock - 1;
+
+						return {
+							...med,
+							remaining_stock: newRemainingStock,
+						};
+					}
+					return med;
+				});
+			});
+
+			setTakenIntakes((prev) => {
+				if (medIsTaken) {
+					return prev.filter(
+						(intake) => intake.time_schedule_id !== timeScheduleId
+					);
+				} else {
+					return [
+						...prev,
+						{
+							id: Date.now(),
+							user_id: user.id,
+							time_schedule_id: timeScheduleId,
+							quantity: quantity,
+						},
+					];
+				}
+			});
 		} catch (error) {
 			setError("Failed to update medication scheduled intake.");
 		} finally {
 			setIsLoading(false);
 		}
-	};
 
-	const handleMedsIntake = (id: number, time: string) => {
-		if (!user) return;
-
-		const medication = todaysMeds.find((med) => med.id == id);
-		if (!medication) {
-			setError("Medication not found.");
-			return;
-		}
-		if (medication.remainingStock <= 0) {
-			setError("Medication has no remaining stock.");
-			return;
-		}
-
-		const medIsTaken = isTaken(id, time);
-
-		setTodaysMeds((prev) => {
-			const newMeds = prev.map((med) => {
-				if (med.id == id) {
-					const newRemainingStock = medIsTaken
-						? med.remainingStock + 1
-						: med.remainingStock - 1;
-					return {
-						...med,
-						remainingStock: newRemainingStock,
-					};
-				}
-				return med;
-			});
-			return newMeds;
-		});
-
-		setTakenIntakes((prev) => {
-			if (medIsTaken) {
-				return prev.filter(
-					(intake) =>
-						!(intake.medication_id == id && intake.scheduled_time == time)
-				);
-			} else {
-				return [
-					...prev,
-					{
-						id: Date.now(),
-						user_id: user.id,
-						medication_id: id,
-						scheduled_time: time,
-					},
-				];
-			}
-		});
-
-		updateMedsIntake(id, time);
+		// updateMedsIntake(timeScheduleId);
 	};
 
 	useEffect(() => {
@@ -112,11 +126,8 @@ const Home = () => {
 	}, [isAuthenticated]);
 
 	const isTaken = useCallback(
-		(id: number, time: string) => {
-			return takenIntakes.some(
-				(intake) =>
-					intake.medication_id == id && intake.scheduled_time == time
-			);
+		(id: number) => {
+			return takenIntakes.some((intake) => intake.time_schedule_id == id);
 		},
 		[takenIntakes]
 	);
@@ -168,14 +179,14 @@ const Home = () => {
 													<div>
 														<p>
 															<span className="text-lg font-bold">
-																{med.brandName}
+																{med.brand_name}
 															</span>
 															<span className="ms-2 text-xs">
 																({med.dosage})
 															</span>
 														</p>
 														<p className="text-xs text-gray-500 font-bold">
-															{med.genericName}
+															{med.generic_name}
 														</p>
 													</div>
 													<div>
@@ -184,24 +195,23 @@ const Home = () => {
 														</p>
 														<p
 															className={`text-2xl font-bold ${getStockColorClass(
-																med.remainingStock
+																med.remaining_stock
 															)}`}
 														>
-															{med.remainingStock}
+															{med.remaining_stock}
 														</p>
 													</div>
 												</div>
 
-												<p className="text-sm text-gray-600"></p>
-												<div className="mt-2 flex flex-wrap gap-2">
-													{med.dailySchedule.map((schedule) => (
+												{/* <div className="mt-2 flex flex-wrap gap-2">
+													{med.time_schedules.map((schedule) => (
 														<button
 															key={schedule.id}
 															className="group  border border-gray-400 bg-white shadow-md cursor-pointer text-gray-500 flex items-center rounded hover:bg-gray-100 active:scale-95"
 															onClick={() =>
 																handleMedsIntake(
 																	med.id,
-																	schedule.time
+																	schedule.id
 																)
 															}
 														>
@@ -209,7 +219,7 @@ const Home = () => {
 																icon={
 																	isTaken(
 																		med.id,
-																		schedule.time
+																		schedule.schedule_time
 																	)
 																		? "circle-check"
 																		: "circle"
@@ -217,13 +227,70 @@ const Home = () => {
 																className={`p-1 ${
 																	isTaken(
 																		med.id,
-																		schedule.time
+																		schedule.schedule_time
 																	) && "text-green-600"
 																}`}
 															/>
-															<span className="font-bold border-s border-gray-400 px-2 py-1 text-sm">
-																{schedule.time}
-															</span>
+															<p className="px-2 border-s border-gray-400 gap-x-1 flex items-center text-left">
+																<span className="font-bold">
+																	{formatTime(
+																		schedule.schedule_time
+																	)}
+																</span>
+																<span className="text-xs px-1 rounded-full bg-gray-400 text-white font-bold">
+																	{schedule.quantity || 0}
+																</span>
+															</p>
+														</button>
+													))}
+												</div> */}
+												<div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+													{med.time_schedules.map((sched) => (
+														<button
+															key={sched.id}
+															className="active:scale-95 flex items-center gap-x-2 px-2 py-1 cursor-pointer hover:bg-gray-50 border border-gray-400 rounded-full bg-white shadow-md"
+															onClick={() =>
+																handleMedsIntake(
+																	med.id,
+																	parseInt(sched.id),
+																	sched.quantity || 0
+																)
+															}
+														>
+															{/* {isTaken(parseInt(sched.id)) ? (
+																<FontAwesomeIcon
+																	icon={[
+																		"far",
+																		"circle-check",
+																	]}
+																	// size="lg"
+																	className="text-teal-600"
+																/>
+															) : (
+																<FontAwesomeIcon
+																	icon={[
+																		"far",
+																		"circle-xmark",
+																	]}
+																	// size="lg"
+																	className="text-rose-600"
+																/>
+															)} */}
+
+															<p
+																className={`font-bold text-white text-xs px-1.5 rounded-full ${
+																	isTaken(parseInt(sched.id))
+																		? "bg-teal-500"
+																		: "bg-rose-500"
+																}`}
+															>
+																{sched.quantity || 0}
+															</p>
+															<p className="font-bold text-gray-600">
+																{formatTime(
+																	sched.schedule_time
+																)}
+															</p>
 														</button>
 													))}
 												</div>

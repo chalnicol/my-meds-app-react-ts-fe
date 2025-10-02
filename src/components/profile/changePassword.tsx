@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthProvider";
+import FormRules from "../formRules";
+import { userDetailsRules } from "../../data";
 
 const ChangePassword = () => {
 	const { error, success, updatePassword, isLoading, clearMessages } =
@@ -37,7 +39,7 @@ const ChangePassword = () => {
 		<>
 			<form onSubmit={handleSubmit} className="flex flex-col gap-y-2 mt-1">
 				<div className="space-y-1">
-					<p className="text-sm font-semibold">Current Password</p>
+					<p className="text-sm text-gray-700">Current Password</p>
 					<input
 						type="password"
 						className="px-3 py-2 rounded border border-gray-400 w-full focus:outline-none focus:ring-1 focus:ring-gray-300"
@@ -47,7 +49,10 @@ const ChangePassword = () => {
 					/>
 				</div>
 				<div className="space-y-1">
-					<p className="text-sm font-semibold">New Password</p>
+					<div className="text-sm text-gray-700 flex items-center gap-x-1">
+						<FormRules rules={userDetailsRules.password} />
+						<span>New Password</span>
+					</div>
 					<input
 						type="password"
 						className="px-3 py-2 rounded border border-gray-400 w-full focus:outline-none focus:ring-1 focus:ring-gray-300"
@@ -57,7 +62,7 @@ const ChangePassword = () => {
 					/>
 				</div>
 				<div className="space-y-1">
-					<p className="text-sm font-semibold">Confirm New Password</p>
+					<p className="text-sm text-gray-700">Confirm New Password</p>
 					<input
 						type="password"
 						className="px-3 py-2 rounded border border-gray-400 w-full focus:outline-none focus:ring-1 focus:ring-gray-300"

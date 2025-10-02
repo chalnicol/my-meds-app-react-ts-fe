@@ -32,11 +32,8 @@ export interface AuthContextType {
 		password: string,
 		password_confirmation: string
 	) => Promise<void>;
-	updateProfile: (
-		email: string,
-		fullname: string,
-		timezone: string
-	) => Promise<void>;
+	updateProfile: (email: string, fullname: string) => Promise<void>;
+	updateSettings: (timezone: string) => Promise<void>;
 	updatePassword: (
 		currentPassword: string,
 		newPassword: string,
@@ -50,6 +47,7 @@ export interface AuthContextType {
 	clearMessages: () => void;
 	currentPage: string;
 	updateCurrentPage: (page: string) => void;
+
 	// resendVerificationEmail: (email: string) => Promise<void>;
 	// requestPasswordReset: (email: string) => Promise<void>;
 }

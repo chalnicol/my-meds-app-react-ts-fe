@@ -1,6 +1,7 @@
 /**
- * Checks if a string is a valid time in either 24-hour (HH:MM) or 12-hour (H:MM AM/PM) format.
- * @param timeString The string to validate (e.g., "09:30", "23:59", "9:30 AM", "11:59 PM").
+ * Checks if a string is a valid time in 24-hour (HH:MM or HH:MM:SS)
+ * or 12-hour (H:MM AM/PM) format.
+ * @param timeString The string to validate (e.g., "09:30:00", "23:59", "9:30 AM", "11:59 PM").
  * @returns {boolean} True if the time is valid, otherwise false.
  */
 export const isValidTime = (timeString: string): boolean => {
@@ -8,17 +9,21 @@ export const isValidTime = (timeString: string): boolean => {
 		return false;
 	}
 
-	// Regex for 24-hour format (HH:MM)
-	// Ensures hours are 00-23 and minutes are 00-59
-	const is24HourValid = /^(?:2[0-3]|[01]?[0-9]):[0-5]?[0-9]$/.test(timeString);
+	const trimmedTime = timeString.trim();
+
+	// 1. Regex for 24-hour format (HH:MM or HH:MM:SS)
+	// Ensures hours are 00-23, minutes are 00-59.
+	// The (:SS)? part makes seconds optional.
+	const is24HourValid =
+		/^(?:2[0-3]|[01]?[0-9]):[0-5][0-9](:[0-5][0-9])?$/.test(trimmedTime);
 	if (is24HourValid) {
 		return true;
 	}
 
-	// Regex for 12-hour format (H:MM AM/PM)
-	// Ensures hours are 1-12 and minutes are 00-59
+	// 2. Regex for 12-hour format (H:MM AM/PM)
+	// Ensures hours are 1-12 and minutes are 00-59. (Unchanged logic)
 	const is12HourValid = /^(0?[1-9]|1[0-2]):[0-5][0-9] ?(am|pm)$/i.test(
-		timeString
+		trimmedTime
 	);
 	if (is12HourValid) {
 		return true;

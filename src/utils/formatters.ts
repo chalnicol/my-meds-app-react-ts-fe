@@ -12,8 +12,11 @@ export const formatTime = (timeString: string): string => {
 	const trimmedTime = timeString.trim();
 
 	// Regex to match and capture parts of a 24-hour time string
+	// const is24HourMatch = trimmedTime.match(
+	// 	/^(?:2[0-3]|[01]?[0-9]):[0-5]?[0-9]$/
+	// );
 	const is24HourMatch = trimmedTime.match(
-		/^(?:2[0-3]|[01]?[0-9]):[0-5]?[0-9]$/
+		/^(?:2[0-3]|[01]?[0-9]):([0-5]?[0-9])(:[0-5]?[0-9])?$/
 	);
 
 	if (is24HourMatch) {
@@ -57,6 +60,54 @@ export const formatDate = (dateString: string): string => {
 		day: "numeric",
 	};
 	return date.toLocaleDateString("en-US", options);
+};
+
+/**
+ * Converts a 12-hour time string with meridian (AM/PM) to a 24-hour time string (HH:MM:00).
+ * This format is suitable for database storage (e.g., Laravel's TIME column).
+ * * @param time12h The 12-hour time string (e.g., "8:00 AM", "12:30 PM").
+ * @returns The 24-hour time string (e.g., "08:00:00", "17:30:00") or null if invalid.
+ */
+export const convertTo24Hour = (time12h: string): string | null => {
+	if (!time12h || typeof time12h !== "string") {
+		return null;
+	}
+
+	// 1. Normalize and validate the input format using a single regex.
+	// This captures the hour, minute, and meridian (am/pm).
+	const match = time12h.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+
+	if (!match) {
+		// Handle variations where minutes might be single digit or missing space,
+		// but the core logic handles the most robust case. If a strict match fails:
+		return null;
+	}
+
+	// Destructure captured groups (H, MM, Period)
+	let [, hourStr, minutes, period] = match;
+
+	let hours = parseInt(hourStr);
+	period = period.toUpperCase();
+
+	// Basic validity check for hours
+	if (isNaN(hours) || hours < 1 || hours > 12) {
+		return null;
+	}
+
+	// 2. Apply 24-hour conversion rules
+	if (period === "PM" && hours !== 12) {
+		// 1 PM -> 13, 5 PM -> 17
+		hours += 12;
+	} else if (period === "AM" && hours === 12) {
+		// 12 AM (midnight) -> 00
+		hours = 0;
+	}
+
+	// 3. Format hours and minutes with leading zeros and append seconds
+	const formattedHours = String(hours).padStart(2, "0");
+
+	// Minutes are already 2 digits from the regex (\d{2})
+	return `${formattedHours}:${minutes}:00`;
 };
 
 export const capitalizeFirstLetter = (str: string): string => {

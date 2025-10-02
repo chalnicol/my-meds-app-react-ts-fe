@@ -281,10 +281,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 		}
 	};
 
+	// --- Profile Actions ---
 	const updateProfile = async (
 		email: string,
-		fullname: string,
-		timezone: string
+		fullname: string
 	): Promise<void> => {
 		//..
 		setIsLoading(true);
@@ -295,7 +295,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 			const response = await apiClient.put("/user/profile", {
 				email,
 				fullname,
-				timezone,
 			});
 			const isEmailNew = response.data.is_email_new;
 			if (isEmailNew) {
@@ -312,6 +311,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 			setSuccess(response.data.message || "Profile data has been updated.");
 		} catch (err: any) {
 			processErrors(err, "Failed to update profile");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const updateSettings = async (timezone: string): Promise<void> => {
+		setIsLoading(true);
+		setError(null);
+		setSuccess(null);
+		try {
+			const response = await apiClient.put("/user/settings", {
+				timezone,
+			});
+			setSuccess(response.data.message || "Settings updated successfully!");
+		} catch (err: any) {
+			processErrors(err, "Failed to update settings");
 		} finally {
 			setIsLoading(false);
 		}
@@ -403,6 +418,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 				authLoading,
 				currentPage,
 				updateCurrentPage,
+				updateSettings,
 				clearMessages,
 				verifyEmail,
 				sendVerificationEmail,

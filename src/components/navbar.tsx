@@ -205,7 +205,7 @@ const Navbar = () => {
 				<Link to="/">{import.meta.env.VITE_APP_NAME}</Link>
 			</h1>
 
-			<ul className="hidden sm:flex items-center gap-x-4 bg-gray-800">
+			<ul className="hidden sm:flex items-center gap-x-3 bg-gray-800">
 				{navLinks.public.map((link) => (
 					<li key={link.id}>
 						{link.name == currentPage ? (
@@ -213,7 +213,10 @@ const Navbar = () => {
 								{link.label}
 							</span>
 						) : (
-							<Link to={link.path} className="hover:text-gray-400">
+							<Link
+								to={link.path}
+								className="px-2 bg-transparent border border-transparent hover:border-gray-600 rounded transition duration-300 ease-in-out cursor-pointer"
+							>
 								{link.label}
 							</Link>
 						)}
@@ -248,7 +251,7 @@ const Navbar = () => {
 								className="group flex items-center gap-x-1 cursor-pointer"
 								onClick={() => setShowProfileMenu((prev) => !prev)}
 							>
-								<p className="group-hover:bg-gray-500 px-1 aspect-square rounded-full bg-gray-600 border border-gray-200 flex items-center justify-center shadow shadow-gray-500">
+								<p className="group-hover:bg-gray-500 px-1 aspect-square rounded-full bg-gray-600 border border-gray-500 flex items-center justify-center shadow shadow-gray-500">
 									<FontAwesomeIcon icon="user" size="sm" />
 								</p>
 								<FontAwesomeIcon
@@ -259,7 +262,7 @@ const Navbar = () => {
 							{showProfileMenu && (
 								<div
 									ref={profileRef}
-									className="flex flex-col top-8 bg-white border border-gray-400 absolute min-w-50 p-1.5 right-0 rounded overflow-hidden shadow-lg text-black mt-1 z-10 space-y-1"
+									className="flex flex-col top-8 bg-white border border-gray-400 absolute min-w-50 p-1.5 right-0 rounded overflow-hidden shadow-lg text-black mt-1 z-30 space-y-1"
 								>
 									<div className="px-2.5 py-2 bg-gray-200 rounded space-y-0.5">
 										<p className="text-sm font-bold">

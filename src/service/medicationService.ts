@@ -1,11 +1,12 @@
 import type {
-	DailyScheduleInfo,
 	FrequencyType,
 	MedsInfo,
 	MedsIntakeInfo,
 	PaginatedResponse,
+	ScheduleInfo,
 	StatusType,
 	StockInfo,
+	TimeScheduleInfo,
 } from "../types";
 import apiClient from "../utils/axiosConfig";
 
@@ -41,10 +42,11 @@ export const addMedication = async (
 	brandName: string,
 	genericName: string,
 	dosage: string,
+	drugForm: string,
 	status: StatusType,
 	frequencyType: FrequencyType,
 	frequency: number[] | null,
-	dailySchedule: DailyScheduleInfo[],
+	timeSchedules: TimeScheduleInfo[],
 	remainingStock: number
 ): Promise<{ message: string; medication: MedsInfo }> => {
 	try {
@@ -52,10 +54,11 @@ export const addMedication = async (
 			brandName,
 			genericName,
 			dosage,
+			drugForm,
 			status,
 			frequencyType,
 			frequency,
-			dailySchedule,
+			timeSchedules,
 			remainingStock,
 		});
 		return response.data;
@@ -71,20 +74,22 @@ export const updateMedication = async (
 	brandName: string,
 	genericName: string,
 	dosage: string,
+	drugForm: string,
 	status: StatusType,
 	frequencyType: FrequencyType,
 	frequency: number[] | null,
-	dailySchedule: DailyScheduleInfo[]
+	timeSchedules: TimeScheduleInfo[]
 ): Promise<{ message: string; medication: MedsInfo }> => {
 	try {
 		const response = await apiClient.put(`/medications/${medicationId}`, {
 			brandName,
 			genericName,
 			dosage,
+			drugForm,
 			status,
 			frequencyType,
 			frequency,
-			dailySchedule,
+			timeSchedules,
 		});
 		return response.data;
 	} catch (error) {
@@ -178,6 +183,32 @@ export const getStocks = async (
 	}
 };
 
+// export const getTodaysMedications = async (): Promise<{
+// 	message: string;
+// 	schedules: ScheduleInfo[];
+// }> => {
+// 	try {
+// 		const response = await apiClient.get("/medications/today");
+// 		return response.data;
+// 	} catch (error) {
+// 		console.error("Error fetching today's medications:", error);
+// 		throw error;
+// 	}
+// };
+
+// export const takeMedication = async (
+// 	time_schedule_id: number
+// ): Promise<{ message: string }> => {
+// 	try {
+// 		const response = await apiClient.post("/medications/take", {
+// 			time_schedule_id,
+// 		});
+// 		return response.data;
+// 	} catch (error) {
+// 		throw error;
+// 	}
+// };
+
 export const getTodaysMedications = async (): Promise<{
 	message: string;
 	medications: MedsInfo[];
@@ -193,13 +224,11 @@ export const getTodaysMedications = async (): Promise<{
 };
 
 export const takeMedication = async (
-	medicationId: number,
-	scheduledTime: string
+	timeScheduleId: number
 ): Promise<{ message: string }> => {
 	try {
 		const response = await apiClient.post("/medications/take", {
-			medicationId,
-			scheduledTime,
+			timeScheduleId,
 		});
 		return response.data;
 	} catch (error) {

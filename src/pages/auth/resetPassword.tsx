@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import FormRules from "../../components/formRules";
+import { userDetailsRules } from "../../data";
 
 const resetPassword = () => {
 	const location = useLocation();
@@ -94,37 +96,56 @@ const resetPassword = () => {
 					onSubmit={handleSubmit}
 					className="flex flex-col gap-4 w-full"
 				>
-					<input
-						type="email"
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						placeholder="Email"
-						required
-						className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-					/>
-					<input
-						type="password"
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						placeholder="Password"
-						required
-						className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-					/>
-					<input
-						type="password"
-						value={passwordConfirmation}
-						onChange={(e) => setPasswordConfirmation(e.target.value)}
-						placeholder="Password Confirmation"
-						required
-						className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-					/>
+					<div>
+						<p className="text-sm text-gray-500 flex items-center gap-x-1 mb-1">
+							<FormRules rules={userDetailsRules.email} />
+							<span>Email</span>
+						</p>
+						<input
+							type="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							// placeholder="Email"
+							placeholder="ex. john.doe@example.com"
+							required
+							className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+						/>
+					</div>
+					<div>
+						<p className="text-sm text-gray-500 flex items-center gap-x-1 mb-1">
+							<FormRules rules={userDetailsRules.password} />
+							<span>Password</span>
+						</p>
+						<input
+							type="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							// placeholder="Password"
+							required
+							className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+						/>
+					</div>
+
+					<div>
+						<p className="text-sm text-gray-500 mb-1">
+							<span>Confirm Password</span>
+						</p>
+						<input
+							type="password"
+							value={passwordConfirmation}
+							onChange={(e) => setPasswordConfirmation(e.target.value)}
+							// placeholder="Password Confirmation"
+							required
+							className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+						/>
+					</div>
 
 					<button
 						type="submit"
 						disabled={isLoading}
 						className="py-1.5 bg-blue-600 text-lg text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 					>
-						{isLoading ? "Processing..." : "Login"}
+						{isLoading ? "Processing..." : "Update Password"}
 					</button>
 				</form>
 				{success && (

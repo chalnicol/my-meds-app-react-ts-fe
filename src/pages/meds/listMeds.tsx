@@ -16,6 +16,7 @@ import OptionButton from "../../components/meds/optionButton";
 import RestockModal from "../../components/restockModal";
 import { getStockColorClass } from "../../utils/generators";
 import { useAuth } from "../../context/AuthProvider";
+import { formatTime } from "../../utils/formatters";
 
 const ListMeds = () => {
 	const { updateCurrentPage } = useAuth();
@@ -153,7 +154,7 @@ const ListMeds = () => {
 					if (med.id == toRestock) {
 						return {
 							...med,
-							remainingStock: med.remainingStock + stock.quantity,
+							remaining_stock: med.remaining_stock + stock.quantity,
 						};
 					}
 					return med;
@@ -238,7 +239,7 @@ const ListMeds = () => {
 					)}
 					{toDelete && (
 						<StatusMessage
-							message={`Are you sure you want to delete ${toDelete.brandName}?`}
+							message={`Are you sure you want to delete ${toDelete.brand_name}?`}
 							type="warning"
 							fixed={true}
 							onClose={() => setToDelete(null)}
@@ -271,13 +272,13 @@ const ListMeds = () => {
 										<div className="flex-1 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 											<div>
 												<span className="text-lg font-bold me-1.5">
-													{med.brandName}
+													{med.brand_name}
 												</span>
 												<span className="text-gray-500 text-xs ms-0.5">
 													({med.dosage})
 												</span>
 												<p className="text-xs text-gray-500 font-semibold">
-													{med.genericName}
+													{med.generic_name}
 												</p>
 											</div>
 											<div>
@@ -286,10 +287,10 @@ const ListMeds = () => {
 												</p>
 												<p
 													className={`text-2xl font-bold ${getStockColorClass(
-														med.remainingStock
+														med.remaining_stock
 													)}`}
 												>
-													{med.remainingStock}
+													{med.remaining_stock}
 												</p>
 											</div>
 											<div>
@@ -332,15 +333,23 @@ const ListMeds = () => {
 											</div>
 											<div>
 												<p className="text-xs font-semibold">
+													Drug Form:
+												</p>
+												<span className="text-xs font-bold rounded-full border border-gray-400 rounded px-3 py-0.5 shadow">
+													{med.drug_form}
+												</span>
+											</div>
+											<div>
+												<p className="text-xs font-semibold">
 													Time Intake Schedule:
 												</p>
 												<div className="mt-1.5 flex flex-wrap gap-1">
-													{med.dailySchedule.map((schedule) => (
+													{med.time_schedules.map((ts) => (
 														<p
-															key={schedule.id}
+															key={ts.id}
 															className="text-xs font-bold rounded-full border border-gray-400 rounded px-3 py-0.5 shadow"
 														>
-															{schedule.time}
+															{formatTime(ts.schedule_time)}
 														</p>
 													))}
 												</div>

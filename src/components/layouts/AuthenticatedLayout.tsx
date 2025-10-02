@@ -7,7 +7,7 @@ interface AuthenticatedLayoutProps {
 const AuthenticatedLayout = ({ children }: AuthenticatedLayoutProps) => {
 	return (
 		<div className="w-full min-h-dvh flex flex-col items-center justify-center">
-			<Navbar className="flex-none" />
+			<Navbar />
 			<main className="flex-grow w-full">{children}</main>
 			<Footer />
 		</div>

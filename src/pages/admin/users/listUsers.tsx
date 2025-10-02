@@ -227,14 +227,14 @@ const ListUsers = () => {
 											{user.email}
 										</p>
 									</div>
-									<div>
+									{/* <div>
 										<p className="text-xs text-gray-500 font-bold">
 											Meds Count
 										</p>
 										<p className="text-lg text-gray-600 font-bold">
 											{user.medications_count}
 										</p>
-									</div>
+									</div> */}
 									<div>
 										<p className="text-xs text-gray-500 font-bold">
 											Account Status
@@ -249,6 +249,7 @@ const ListUsers = () => {
 											{user.is_blocked ? "BLOCKED" : "ACTIVE"}
 										</span>
 									</div>
+
 									<div>
 										<p className="text-xs text-gray-500 font-bold">
 											Social User
@@ -262,6 +263,25 @@ const ListUsers = () => {
 										>
 											{user.social_user ? "Yes" : "No"}
 										</p>
+									</div>
+									<div>
+										<p className="text-xs text-gray-500 font-bold">
+											Roles
+										</p>
+										{user.roles.length > 0 ? (
+											<div className="mt-1 flex flex-wrap gap-x-2 gap-y-1.5">
+												{user.roles.map((role) => (
+													<span
+														key={role}
+														className="border border-gray-400 text-xs font-bold rounded-full shadow px-2 bg-white"
+													>
+														{role.toUpperCase()}
+													</span>
+												))}
+											</div>
+										) : (
+											<p className="text-sm text-gray-600">--</p>
+										)}
 									</div>
 								</div>
 								<div>

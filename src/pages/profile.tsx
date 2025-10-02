@@ -10,6 +10,7 @@ import ChangePassword from "../components/profile/changePassword";
 import gsap from "gsap";
 import { useOutsideClick } from "../hooks/useOutsideClick";
 import DeleteAccount from "../components/profile/deleteAccount";
+import AccountSettings from "../components/profile/accountSettings";
 
 const Profile = () => {
 	const { isLoading, user, updateCurrentPage } = useAuth();
@@ -54,6 +55,7 @@ const Profile = () => {
 	const tabs = [
 		{ id: 1, label: "Profile Details", type: "profile" },
 		{ id: 3, label: "Change Password", type: "password" },
+		{ id: 2, label: "Account Settings", type: "settings" },
 		{ id: 4, label: "Delete Account", type: "delete" },
 	];
 
@@ -70,7 +72,7 @@ const Profile = () => {
 						>
 							<div className="flex items-center gap-x-1 font-semibold">
 								<button
-									className="px-0.5 hover:bg-gray-200 aspect-square flex-none rounded-full cursor-pointer"
+									className="px-0.5 hover:bg-gray-200 aspect-square bg-gray-100 flex-none rounded-full cursor-pointer"
 									onClick={() => setShowDropdown((prev) => !prev)}
 								>
 									<FontAwesomeIcon icon="ellipsis-vertical" />
@@ -83,7 +85,7 @@ const Profile = () => {
 							{showDropdown && (
 								<div
 									ref={dropdownMenuRef}
-									className="absolute top-7 flex flex-col w-38 border border-gray-400 rounded overflow-hidden shadow"
+									className="absolute z-10 top-7 flex flex-col w-38 border border-gray-400 rounded overflow-hidden shadow"
 								>
 									{tabs.map((tab) => (
 										<button
@@ -122,13 +124,8 @@ const Profile = () => {
 
 						<div className="flex-1 w-full h-full rounded">
 							<div className="max-w-xl">
-								{currentTab === "profile" && (
-									<UpdateProfile
-										currentEmail={user.email}
-										currentFullname={user.fullname}
-										currentTimezone={user.timezone}
-									/>
-								)}
+								{currentTab === "profile" && <UpdateProfile />}
+								{currentTab === "settings" && <AccountSettings />}
 								{currentTab === "password" && <ChangePassword />}
 								{currentTab === "delete" && <DeleteAccount />}
 							</div>

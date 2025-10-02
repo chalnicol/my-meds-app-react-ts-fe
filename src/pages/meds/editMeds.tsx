@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { DailyScheduleInfo, FrequencyType, StatusType } from "../../types";
-import { isValidTime } from "../../utils/validators";
-import { generateRandomString } from "../../utils/generators";
-import { formatTime } from "../../utils/formatters";
+import { useEffect, useMemo, useState } from "react";
+import {
+	drugForms,
+	type DrugFormType,
+	type FrequencyType,
+	type StatusType,
+	type TimeScheduleInfo,
+} from "../../types";
 import { weekDays } from "../../data";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -14,6 +16,9 @@ import Loader from "../../components/loader";
 import Header from "../../components/header";
 import StatusMessage from "../../components/statusMessage";
 import { useAuth } from "../../context/AuthProvider";
+import TimeScheduleForm from "../../components/timeScheduleForm";
+import DropdownSelect from "../../components/dropdownSelect";
+import { formatTime } from "../../utils/formatters";
 
 const EditMeds = () => {
 	const { isAuthenticated, updateCurrentPage } = useAuth();
@@ -23,22 +28,16 @@ const EditMeds = () => {
 	const [brandName, setBrandName] = useState<string>("");
 	const [genericName, setGenericName] = useState<string>("");
 	const [dosage, setDosage] = useState<string>("");
-	// const [stock, setStock] = useState<StockHistoryInfo | null>(null);
-
-	const [timeSchedule, setTimeSchedule] = useState<string>("");
+	const [drugForm, setDrugForm] = useState<DrugFormType>("Tablet");
 	const [fieldErrors, setFieldErrors] = useState<Record<
 		string,
 		string | null
 	> | null>(null);
-
 	const [frequencyType, setFrequencyType] =
 		useState<FrequencyType>("Everyday");
-
 	const [status, setStatus] = useState<StatusType>("Active");
-
 	const [frequency, setFrequency] = useState<number[] | null>([]);
-
-	const [dailySchedule, setDailySchedule] = useState<DailyScheduleInfo[]>([]);
+	const [timeSchedules, setTimeSchedules] = useState<TimeScheduleInfo[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [success, setSuccess] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -98,64 +97,19 @@ const EditMeds = () => {
 		});
 	};
 
-	const handleAddSchedule = () => {
-		if (timeSchedule == "") {
-			// setTimeScheduleError("Please input time.");
-			setFieldErrors((prev) => ({
-				...prev,
-				timeSchedule: "Please input time.",
-			}));
-			return;
-		}
-		if (!isValidTime(timeSchedule)) {
-			// setTimeScheduleError("Invalid time format.");
-			setFieldErrors((prev) => ({
-				...prev,
-				timeSchedule: "Invalid time format.",
-			}));
-			return;
-		}
-
-		const formattedTime = formatTime(timeSchedule);
-
-		const isDuplicate = dailySchedule.some(
-			(sched) => sched.time === formattedTime
-		);
-
-		if (isDuplicate) {
-			setFieldErrors((prev) => ({
-				...prev,
-				timeSchedule: "Duplicate time entry.",
-			}));
-			return;
-		}
-
-		setDailySchedule((prev) => {
-			return [
-				...prev,
-				{ id: generateRandomString(10), time: formattedTime },
-			];
-		});
-		setTimeSchedule("");
-		setFieldErrors(null);
-	};
-
-	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.key === "Enter") {
-			e.preventDefault(); // This is the crucial line to prevent form submission
-			handleAddSchedule();
-		}
-	};
-
-	const handleRemoveDailySchedule = (id: string) => {
-		setDailySchedule((prev) => {
-			return prev.filter((sched) => sched.id !== id);
-		});
-	};
-
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		console.log("submit form");
+		// console.log("submit form");
+
+		if (timeSchedules.length < 1) {
+			setFieldErrors((prev) => {
+				return {
+					...prev,
+					timeSchedule: "Should have at least 1 time schedule",
+				};
+			});
+			return;
+		}
 
 		if (!id) return;
 
@@ -166,10 +120,11 @@ const EditMeds = () => {
 				brandName,
 				genericName,
 				dosage,
+				drugForm,
 				status,
 				frequencyType,
 				frequency,
-				dailySchedule
+				timeSchedules
 			);
 			setSuccess("Medication updated successfully!");
 			// clearForms();
@@ -189,13 +144,14 @@ const EditMeds = () => {
 
 			const { medication } = response;
 			// console.log(response);
-			setBrandName(medication.brandName);
-			setGenericName(medication.genericName);
+			setBrandName(medication.brand_name);
+			setGenericName(medication.generic_name);
 			setDosage(medication.dosage);
 			setStatus(medication.status);
 			setFrequency(medication.frequency);
-			setDailySchedule(medication.dailySchedule);
-			setFrequencyType(medication.frequencyType);
+			setFrequencyType(medication.frequency_type);
+			setDrugForm(medication.drug_form);
+			setTimeSchedules(medication.time_schedules);
 		} catch (error: any) {
 			console.log(error);
 		} finally {
@@ -227,6 +183,21 @@ const EditMeds = () => {
 		);
 	};
 
+	const drugFormOptions = drugForms.map((form, index) => ({
+		id: index,
+		value: form,
+		label: form,
+	}));
+
+	const formattedTimeSchedules = useMemo((): TimeScheduleInfo[] => {
+		return timeSchedules.map((sched) => {
+			return {
+				...sched,
+				schedule_time: formatTime(sched.schedule_time),
+			};
+		});
+	}, [timeSchedules]);
+
 	return (
 		<>
 			<title>{`Edit Medication | ${import.meta.env.VITE_APP_NAME}`}</title>
@@ -253,7 +224,23 @@ const EditMeds = () => {
 
 					<form onSubmit={handleSubmit} className="max-w-5xl">
 						<div className="space-y-2">
-							<div className="grid md:grid-cols-2 gap-x-4 space-y-2">
+							<div className="md:grid grid-cols-2 gap-x-4 space-y-2">
+								{/* drug form */}
+								<div>
+									<label
+										htmlFor="drugForm"
+										className="text-sm font-semibold"
+									>
+										Drug Form
+									</label>
+									<DropdownSelect
+										value={drugForm}
+										onChange={(value) => setDrugForm(value)}
+										options={drugFormOptions}
+										className="mt-1"
+									/>
+								</div>
+								{/* brand name */}
 								<div>
 									<label
 										htmlFor="brandName"
@@ -270,6 +257,7 @@ const EditMeds = () => {
 										required
 									/>
 								</div>
+								{/* generic name */}
 								<div>
 									<label
 										htmlFor="genericName"
@@ -286,6 +274,7 @@ const EditMeds = () => {
 										required
 									/>
 								</div>
+								{/* dosage */}
 								<div>
 									<label
 										htmlFor="dosage"
@@ -293,6 +282,7 @@ const EditMeds = () => {
 									>
 										Dosage
 									</label>
+
 									<input
 										type="text"
 										id="dosage"
@@ -302,33 +292,34 @@ const EditMeds = () => {
 										required
 									/>
 								</div>
-								<div>
-									<label
-										htmlFor="active"
-										className="text-sm font-semibold"
-									>
-										Status
-									</label>
-									<div className="mt-1 grid grid-cols-2 font-semibold">
-										{medStatus.map((s, index) => (
-											<button
-												key={index}
-												type="button"
-												className={`border first:rounded-s last:rounded-e px-2 py-1.5 ${
-													s == status
-														? "bg-gray-400 border-gray-300 text-white"
-														: "bg-gray-100 hover:bg-gray-50 border-gray-300 cursor-pointer shadow"
-												}`}
-												onClick={() => setStatus(s)}
-											>
-												{s}
-											</button>
-										))}
-									</div>
-								</div>
 							</div>
-							<div className="grid md:grid-cols-2 gap-x-4 space-y-2">
+							<div className="md:grid grid-cols-2 gap-x-4 space-y-2">
 								<div className="space-y-2">
+									{/* status */}
+									<div>
+										<label
+											htmlFor="active"
+											className="text-sm font-semibold"
+										>
+											Status
+										</label>
+										<div className="mt-1 grid grid-cols-2 font-semibold">
+											{medStatus.map((s, index) => (
+												<button
+													key={index}
+													type="button"
+													className={`border first:rounded-s last:rounded-e px-2 py-1.5 ${
+														s == status
+															? "bg-gray-400 border-gray-300 text-white"
+															: "bg-gray-100 hover:bg-gray-50 border-gray-300 cursor-pointer shadow"
+													}`}
+													onClick={() => setStatus(s)}
+												>
+													{s}
+												</button>
+											))}
+										</div>
+									</div>
 									<div>
 										<label
 											htmlFor="timeofday"
@@ -360,7 +351,7 @@ const EditMeds = () => {
 											htmlFor="weeklySchedule"
 											className="text-sm font-semibold"
 										>
-											Frequency - Select Days
+											Select Days
 										</label>
 										<div className="mt-1 grid grid-cols-4 gap-1">
 											{weekDays.map((day) => (
@@ -388,70 +379,15 @@ const EditMeds = () => {
 								</div>
 								<div>
 									<label className="text-sm font-semibold">
-										Daily Intake Times
+										Time Schedule Intakes
 									</label>
-									<div className="px-2 pt-1 pb-2 border border-gray-300 shadow rounded mt-1">
-										<div className="h-33 border border-gray-300 mt-1 bg-gray-50 overflow-y-auto">
-											{dailySchedule.length > 0 ? (
-												<>
-													{dailySchedule.map((schedule) => (
-														<div
-															key={schedule.id}
-															className="px-2 py-1 odd:bg-white even:bg-gray-200 border-b border-gray-300 flex items-center"
-														>
-															<p className="flex-1">
-																{schedule.time}
-															</p>
-															<button
-																type="button"
-																className="cursor-pointer hover:bg-gray-400 text-xs hover:bg-gray-400/50 px-1 font-semibold"
-																onClick={() =>
-																	handleRemoveDailySchedule(
-																		schedule.id
-																	)
-																}
-															>
-																<FontAwesomeIcon
-																	icon="xmark"
-																	size="xs"
-																/>
-															</button>
-														</div>
-													))}
-												</>
-											) : (
-												<p className="px-2 py-1">
-													No time intake schedule shown...
-												</p>
-											)}
-										</div>
-
-										<div className="flex gap-x-2 mt-2">
-											<input
-												type="text"
-												value={timeSchedule}
-												className="flex-1 border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-gray-300"
-												placeholder="input time here.."
-												onChange={(e) =>
-													setTimeSchedule(e.target.value)
-												}
-												onKeyDown={handleKeyDown}
-											/>
-											<button
-												type="button"
-												className="bg-gray-500 hover:bg-gray-400 px-3 rounded font-semibold text-white cursor-pointer flex items-center gap-x-1"
-												onClick={handleAddSchedule}
-											>
-												<FontAwesomeIcon icon="plus" size="sm" />
-												<span className="text-sm">SCHEDULE</span>
-											</button>
-										</div>
-										{fieldErrors && fieldErrors.timeSchedule && (
-											<p className="text-xs text-red-500 mt-1">
-												{fieldErrors.timeSchedule}
-											</p>
-										)}
-									</div>
+									<TimeScheduleForm
+										timeSchedules={formattedTimeSchedules}
+										onChange={(value) => setTimeSchedules(value)}
+										error={fieldErrors && fieldErrors.timeSchedule}
+										className="mt-1"
+										drugForm={drugForm}
+									/>
 								</div>
 							</div>
 						</div>
@@ -461,7 +397,7 @@ const EditMeds = () => {
 								to="/medications"
 								className="border border-sky-400 bg-sky-500 hover:bg-sky-400 text-white cursor-pointer transition duration-200 rounded my-2 inline-block text-center sm:w-32 py-1.5 font-semibold shadow-md"
 							>
-								BACK
+								BACK TO LIST
 							</Link>
 							<button className="border border-green-400 bg-green-500 hover:bg-green-400 text-400 text-white cursor-pointer transition duration-200 rounded my-2 sm:w-28 py-1.5 font-semibold shadow-md">
 								UPDATE
